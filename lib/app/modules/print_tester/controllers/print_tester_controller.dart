@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:blue_thermal_printer/blue_thermal_printer.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 
 class PrintTesterController extends GetxController {
@@ -10,9 +11,45 @@ class PrintTesterController extends GetxController {
   
   // Controller buat handle input text custom dari UI
   final textController = TextEditingController();
-  
+  final ImagePicker _picker = ImagePicker();
+  var selectedImagePath = ''.obs; // Buat nyimpen path gambar yang dipilih
   var isLoading = false.obs;
 
+
+  Future<void> pickAndCompressImage() async {
+    try {
+      // Ini rahasianya bro: pake maxWidth dan imageQuality
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 384,     // Mentokin di 384 pixel biar pas di kertas 58mm
+        imageQuality: 50,  // Kompres kualitasnya jadi 50% biar size file kecil
+      );
+
+      if (image != null) {
+        selectedImagePath.value = image.path;
+        Get.snackbar("Sukses", "Gambar berhasil dimuat dan dikompres!");
+      }
+    } catch (e) {
+      Get.snackbar("Error", "Gagal milih gambar: $e");
+    }
+  }
+
+  // Fungsi buat nge-print gambar yang udah dipilih
+  void printCustomImage() async {
+    if (selectedImagePath.value.isEmpty) {
+      Get.snackbar("Peringatan", "Pilih gambar dulu bro!");
+      return;
+    }
+
+    bool? isConnected = await bluetooth.isConnected;
+    if (isConnected == true) {
+      // Langsung print dari path lokal hasil pick image
+      bluetooth.printImage(selectedImagePath.value);
+      bluetooth.printNewLine();
+      bluetooth.printNewLine();
+    }
+  }
+  
   // 1. Fungsi Cetak Teks Custom dari Input-an User
   void printCustomText() async {
     String text = textController.text.trim();
