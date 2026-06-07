@@ -11,7 +11,7 @@ class PrintTesterView extends GetView<PrintTesterController> {
       backgroundColor: Colors.grey[100], // Background clean ala modern app
       appBar: AppBar(
         title: const Text(
-          'Thermal Printer',
+          'MINA Print System', // Gue ganti judulnya biar sekalian custom
           style: TextStyle(color: Colors.black87, fontWeight: FontWeight.w600),
         ),
         backgroundColor: Colors.white,
@@ -67,7 +67,7 @@ class PrintTesterView extends GetView<PrintTesterController> {
 
             // --- SECTION 1: CUSTOM TEXT ---
             _buildSectionCard(
-              title: "Cetak Teks Custom",
+              title: "Cetak Teks ke Struk",
               icon: Icons.text_snippet_rounded,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -77,7 +77,7 @@ class PrintTesterView extends GetView<PrintTesterController> {
                     maxLength: 100, // Fitur limit 100 karakter
                     maxLines: 3,
                     decoration: InputDecoration(
-                      hintText: 'Misal: Promo Roti Bakar Kopi Jono Tegal...',
+                      hintText: 'Ketik pesan custom buat pelanggan...',
                       hintStyle: TextStyle(color: Colors.grey.shade400),
                       filled: true,
                       fillColor: Colors.grey.shade50,
@@ -99,7 +99,7 @@ class PrintTesterView extends GetView<PrintTesterController> {
                   ElevatedButton.icon(
                     onPressed: controller.printCustomText,
                     icon: const Icon(Icons.print_rounded),
-                    label: const Text("Cetak Teks"),
+                    label: const Text("Cetak Teks dengan Template"),
                     style: _primaryButtonStyle(),
                   ),
                 ],
@@ -107,22 +107,9 @@ class PrintTesterView extends GetView<PrintTesterController> {
             ),
             const SizedBox(height: 16),
 
-            // --- SECTION 2: STRUK KASIR ---
+            // --- SECTION 2: GAMBAR CUSTOM ---
             _buildSectionCard(
-              title: "Template Struk",
-              icon: Icons.receipt_long_rounded,
-              child: ElevatedButton.icon(
-                onPressed: controller.printSampleReceipt,
-                icon: const Icon(Icons.point_of_sale_rounded),
-                label: const Text("Cetak Contoh Struk Belanja"),
-                style: _actionButtonStyle(Colors.orangeAccent),
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            // --- SECTION 3: GAMBAR CUSTOM ---
-            _buildSectionCard(
-              title: "Cetak Gambar",
+              title: "Cetak Gambar ke Struk",
               icon: Icons.image_rounded,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -149,7 +136,7 @@ class PrintTesterView extends GetView<PrintTesterController> {
                               ? null 
                               : controller.printCustomImage,
                           icon: const Icon(Icons.print_rounded),
-                          label: const Text("Print Logo"),
+                          label: const Text("Print Gambar"),
                           style: _actionButtonStyle(Colors.blueAccent),
                         )),
                       ),
@@ -187,7 +174,7 @@ class PrintTesterView extends GetView<PrintTesterController> {
     );
   }
 
-  // --- WIDGET HELPER BUKIN UI KONSISTEN ---
+  // --- WIDGET HELPER BIKIN UI KONSISTEN ---
 
   // Bikin Container / Card putih modern untuk tiap section
   Widget _buildSectionCard({required String title, required IconData icon, required Widget child}) {
