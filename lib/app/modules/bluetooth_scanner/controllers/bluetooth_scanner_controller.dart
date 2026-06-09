@@ -10,8 +10,6 @@ class BluetoothScannerController extends GetxController {
   var devices = <BluetoothDevice>[].obs;
   var selectedDevice = Rxn<BluetoothDevice>();
   var isConnected = false.obs;
-
-  // State baru buat nampilin loading pas lagi proses koneksi
   var connectingDeviceId = ''.obs;
 
   @override
@@ -38,7 +36,6 @@ class BluetoothScannerController extends GetxController {
         backgroundColor: Colors.red.shade100,
         colorText: Colors.red.shade800,
         snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(12),
       );
     }
   }
@@ -66,48 +63,54 @@ class BluetoothScannerController extends GetxController {
     }
   }
 
+  // --- LOGIC KONEKSI YANG UDAH DI-PERBAIKI ---
   void connectToDevice(BluetoothDevice device) async {
     if (device.address == null) return;
-
-    // Cegah user nge-spam pencet tombol
     if (connectingDeviceId.value == device.address) return;
 
+    connectingDeviceId.value = device.address!; // Nyalain loading
+
     try {
-      connectingDeviceId.value = device.address!; // Nyalain loading
-      
-      bool? connected = await bluetooth.connect(device);
-      
-      if (connected == true) {
-        selectedDevice.value = device;
-        isConnected.value = true;
-        
-        Get.snackbar(
-          "Berhasil!", 
-          "Printer ${device.name} udah terhubung bro.",
-          backgroundColor: Colors.green.shade100,
-          colorText: Colors.green.shade800,
-          snackPosition: SnackPosition.BOTTOM,
-          margin: const EdgeInsets.all(12),
-        );
-        
-        // Kasih jeda dikit biar user sempet liat tombol jadi ijo
-        await Future.delayed(const Duration(milliseconds: 500));
-        Get.toNamed('/print_tester'); 
-      }
+      // Kita coba konek dengan timeout biar ga stuck loading forever
+      await bluetooth.connect(device).timeout(const Duration(seconds: 5));
     } catch (e) {
-      // Error handling kalau printer mati atau nolak koneksi
+      // Abaikan error di sini sementara, karena package ini sering ngasih error palsu.
+      print("Package throw error: $e, checking manual status...");
+    }
+
+    // Kasih napas 1.5 detik buat hardware nyelesaiin pairing di background
+    await Future.delayed(const Duration(milliseconds: 1500));
+
+    // Double check: Apakah beneran gagal, atau aslinya udah konek?
+    bool? actuallyConnected = await bluetooth.isConnected;
+
+    if (actuallyConnected == true) {
+      selectedDevice.value = device;
+      isConnected.value = true;
+      
+      Get.snackbar(
+        "Berhasil!", 
+        "Printer ${device.name} udah terhubung bro.",
+        backgroundColor: Colors.green.shade100,
+        colorText: Colors.green.shade800,
+        snackPosition: SnackPosition.TOP, // Pindah ke atas biar ga ketutup tombol
+      );
+      
+      // Kasih jeda 0.5 detik biar user baca snackbar, baru otomatis pindah
+      await Future.delayed(const Duration(milliseconds: 500));
+      Get.toNamed('/print-tester'); 
+    } else {
+      // Kalau beneran gagal (printer mati / nyambung HP lain)
       Get.snackbar(
         "Koneksi Gagal", 
-        "Cek printernya nyala nggak, atau jangan-jangan masih konek ke HP lain bro.\nDetails: $e",
+        "Cek printernya nyala nggak, atau mungkin lagi nyantol di HP lain bro.",
         backgroundColor: Colors.red.shade100,
         colorText: Colors.red.shade800,
         snackPosition: SnackPosition.BOTTOM,
-        margin: const EdgeInsets.all(12),
-        duration: const Duration(seconds: 4),
       );
-    } finally {
-      connectingDeviceId.value = ''; // Matiin loading apapun yang terjadi
     }
+    
+    connectingDeviceId.value = ''; // Matiin loading
   }
 
   void disconnectDevice() async {

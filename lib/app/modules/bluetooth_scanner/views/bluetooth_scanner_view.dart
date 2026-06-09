@@ -151,7 +151,7 @@ class BluetoothScannerView extends GetView<BluetoothScannerController> {
                         return ElevatedButton.icon(
                           onPressed: () {
                             // Kalau dipencet lagi pas udah terhubung, langsung buka menu print
-                            Get.toNamed('/print_tester');
+                            Get.toNamed('/print-tester');
                           },
                           icon: const Icon(Icons.check_circle_rounded, size: 18),
                           label: const Text('Terhubung'),

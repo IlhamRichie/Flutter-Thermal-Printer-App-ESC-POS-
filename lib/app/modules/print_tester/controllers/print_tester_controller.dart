@@ -129,8 +129,6 @@ class PrintTesterController extends GetxController {
     }
   }
 
-  // (Opsional) Fungsi printSampleReceipt dihapus aja kalau udah nggak dipake
-
   @override
   void onClose() {
     textController.dispose();
